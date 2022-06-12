@@ -6,3 +6,6 @@ The purpose of this project is to be able to send out mass emails to addresses p
 * **robust and easy-to-understand documentation** so anyone can easily diagnose and debug issues _if_ they arise
 * **an executable or single command** to run the program
 * **to provide a teaching opportunity** for those interested in learning how Python can automate simple tasks with relative ease
+
+## How the Program Works
+We borrow much of the code from this [article](https://realpython.com/python-send-email/) which also provides some nice details regarding the process. 
