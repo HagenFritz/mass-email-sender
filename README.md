@@ -19,6 +19,7 @@ We borrow much of the code from this [article](https://realpython.com/python-sen
 ## Resources
 Some the articles and other resources used to help construct the code in this repository
 * [Shields](https://shields.io/category/activity)
+* [Working with PDFs in Python](https://realpython.com/pdf-python/#how-to-extract-document-information-from-a-pdf-in-python)
 * [Sending Emails with Python](https://realpython.com/python-send-email/)
 * [Testing in Python](https://realpython.com/python-testing/)
 * Code Coverage
