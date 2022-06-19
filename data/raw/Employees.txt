@@ -1,5 +1,0 @@
-{'RDaniell': 'rylanadaniell@gmail.com',
-'HFritz': 'hagenfritz@gmail.com',
-'WFritz': 'hagenfritz@utexas.edu',
-'JSmith': 'bademail@notawebsite.cm',
-'OTutor': 'oldtutor@gmail.com'}
