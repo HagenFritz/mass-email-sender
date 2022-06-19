@@ -13,7 +13,24 @@ The purpose of this project is to be able to send out mass emails to addresses p
 * **to provide a teaching opportunity** for those interested in learning how Python can automate simple tasks with relative ease
 * **to integrate testing and code coverage** so that we can understand the moment something goes awry
 
-## How the Program Works
+# Running the Program
+The latest release [v1.0.0]() contains two executable files for Mac-OS and Windows which run the `send_schedule.py` script as long as the folder structure is left intact and the file "ALC Schedule.pdf" is located in the some folder as the executable. Simply:
+1. Click the `send_schedule.exe` icon
+2. A command prompt will open asking the user to input a gmail account and password.
+
+# How the Program Works
+This program has two main components:
+* ✂️ **Split an Aggregate PDF Schedule**: Tutor schedules can only be saved in one file so the first step is to split this file into individual PDFs that correspond to each tutor.
+* 📧 **Email Schedules to Tutors**: Sent the schedules to tutors using a text file that links the tutor name with their email. 
+
+Each of these components is separated into two classes stored within the `send_schedule.py` script and are descirbed in more detail below.
+
+
+
+
+## Splitting the PDF
+
+
 We borrow much of the code from this [article](https://realpython.com/python-send-email/) which also provides some nice details regarding the process. 
 
 ## Resources
