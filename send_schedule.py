@@ -50,7 +50,7 @@ class CreateSchedules:
         else:
             self.path_to_top = path_to_top
 
-        self.pdf = PyPDF2.PdfFileReader(f"{self.path_to_top}/data/raw/{aggregate_schedule}.pdf")
+        self.pdf = PyPDF2.PdfFileReader(f"{self.path_to_top}/{aggregate_schedule}.pdf")
 
     def get_pages_per_tutor(self):
         """
@@ -102,7 +102,7 @@ class CreateSchedules:
                 pdf_writer.addPage(self.pdf.getPage(pg))
                 
             # save the new pdf to the processed directory with the tutors name
-            output = f"{self.path_to_top}/data/processed/{tutor}.pdf"
+            output = f"{self.path_to_top}/processed_schedules/{tutor}.pdf"
             with open(output, 'wb') as output_pdf:
                 pdf_writer.write(output_pdf)
 
@@ -130,7 +130,7 @@ class EmailWithAttachment:
         else:
             self.path_to_top = path_to_top
 
-        with open(f"{self.path_to_top}/data/raw/{employee_email_list}.txt") as f:
+        with open(f"{self.path_to_top}/{employee_email_list}.txt") as f:
             data = f.read()
 
         self.tutors_and_emails = ast.literal_eval(data)
@@ -139,7 +139,7 @@ class EmailWithAttachment:
         """
         Emails out the attaced schedules to tutors
         """
-        with open(f'{self.path_to_top}/data/raw/email_body.txt') as f:
+        with open(f'{self.path_to_top}/email_body.txt') as f:
             body = f.read()
         
         from_address = "alcschedule1@gmail.com"
@@ -149,6 +149,9 @@ class EmailWithAttachment:
         with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
             server.login(from_address, password)
             
+            log.info("----------------")
+            log.info("Sending Schedule")
+            log.info("----------------")
             for name, email in self.tutors_and_emails.items():
                 # Create a multipart message and set headers
                 message = MIMEMultipart()
@@ -164,7 +167,7 @@ class EmailWithAttachment:
                 message["Subject"] = f"ALC Schedule {datetime.strftime(datetime.now(),'%m.%d.%Y')}"
                 message.attach(MIMEText(body.format(name=name), "plain"))
                 
-                filename = f"{self.path_to_top}/data/processed/{name}.pdf"
+                filename = f"{self.path_to_top}/processed_schedules/{name}.pdf"
 
                 # Open PDF file in binary mode
                 try:
@@ -194,7 +197,7 @@ class EmailWithAttachment:
                     )
                     log.info("Success: email sent")
                 except FileNotFoundError:
-                    log.warning(f"Error: No file for {name} in {self.path_to_top}/processed/")
+                    log.warning(f"Error: No file for {name} in {self.path_to_top}/processed_schedules/")
 
             log.info(f"{lines}")
 
@@ -223,22 +226,20 @@ def setup_logging(log_file_name):
 
     # Create handler
     try:
-        f_handler = logging.FileHandler(f'{application_path}/reports/{log_file_name}.log',mode='w')
+        f_handler = logging.FileHandler(f'{application_path}/logs/{log_file_name}.log',mode='a')
     except FileNotFoundError:
         # means that we are running from CLI
         dir_path = f"{pathlib.Path(__file__).resolve().parent}"
-        f_handler = logging.FileHandler(f'{dir_path}/reports/{log_file_name}.log',mode='w')
+        f_handler = logging.FileHandler(f'{dir_path}/logs/{log_file_name}.log',mode='a')
     
-        logging.getLogger().setLevel(logging.INFO)
+    logging.getLogger().setLevel(logging.INFO)
 
-        # Create formatter and add it to handler
-        f_format = logging.Formatter('%(asctime)s: (%(lineno)d) - %(levelname)s:\t%(message)s',datefmt='%m/%d/%y %H:%M:%S')
-        f_handler.setFormatter(f_format)
+    # Create formatter and add it to handler
+    f_format = logging.Formatter('%(asctime)s: (%(lineno)d) - %(levelname)s:\t%(message)s',datefmt='%m/%d/%y %H:%M:%S')
+    f_handler.setFormatter(f_format)
 
-        # Add handler to the logger
-        logger.addHandler(f_handler)
-    
-        pass
+    # Add handler to the logger
+    logger.addHandler(f_handler)
 
     # repeat the above steps but for a StreamHandler
     c_handler = logging.StreamHandler()
