@@ -142,8 +142,8 @@ class EmailWithAttachment:
         with open(f'{self.path_to_top}/email_body.txt') as f:
             body = f.read()
         
-        from_address = "alcschedule1@gmail.com"
-        password = "dxqhtpcytzgjqkgu"#input("Type your password and press enter: ")
+        from_address = input("Type the email account: ")
+        password = input("Type your password and press enter: ")
 
         context = ssl.create_default_context()
         with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
