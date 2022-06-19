@@ -1,6 +1,8 @@
 import argparse
 import pathlib
 import logging
+import os
+import sys
 
 import ast
 
@@ -18,10 +20,12 @@ from email.mime.text import MIMEText
 
 from datetime import datetime
 
+# Needed for conversion to .exe
+application_path = os.path.dirname(sys.executable)
 
 class CreateSchedules:
 
-    def __init__(self, aggregate_schedule) -> None:
+    def __init__(self, aggregate_schedule, path_to_top="cli") -> None:
         """
         Creates the individualized PDF schedules
 
@@ -29,17 +33,24 @@ class CreateSchedules:
         ----------
         aggregate_schedule : str
             pdf filename contaning the aggregated schedule
+        path_to_top : str, "cli" or absolute path
+            path to the top of the directory structure
+            "cli" tells the program that you are running from the CLI and should use the project's structure
 
         Creates
         -------
-        data_dir : str
-            path to the data directory
+        path_to_top : str
+            path to the top directory
         pdf : PyPDF2 object
             the base pdf 
         
         """
-        self.data_dir = f"{pathlib.Path(__file__).resolve().parent}/data"
-        self.pdf = PyPDF2.PdfFileReader(f"{self.data_dir}/raw/{aggregate_schedule}.pdf")
+        if path_to_top == "cli":
+            self.path_to_top = f"{pathlib.Path(__file__).resolve().parent}"
+        else:
+            self.path_to_top = path_to_top
+
+        self.pdf = PyPDF2.PdfFileReader(f"{self.path_to_top}/data/raw/{aggregate_schedule}.pdf")
 
     def get_pages_per_tutor(self):
         """
@@ -91,13 +102,13 @@ class CreateSchedules:
                 pdf_writer.addPage(self.pdf.getPage(pg))
                 
             # save the new pdf to the processed directory with the tutors name
-            output = f"{self.data_dir}/processed/{tutor}.pdf"
+            output = f"{self.path_to_top}/data/processed/{tutor}.pdf"
             with open(output, 'wb') as output_pdf:
                 pdf_writer.write(output_pdf)
 
 class EmailWithAttachment:
     
-    def __init__(self,employee_email_list) -> None:
+    def __init__(self, employee_email_list, path_to_top="cli") -> None:
         """
         Emails list of employees and their emails an attachment
 
@@ -105,14 +116,21 @@ class EmailWithAttachment:
         ----------
         employee_email_list : str
             filename of the tutor emails in a json-like format but saved as a txt
+        path_to_top : str, "cli" or absolute path
+            path to the top of the directory structure
+            "cli" tells the program that you are running from the CLI and should use the project's structure
 
         Creates
         -------
         tutors_and_emails : dict
             keys as tutor name (first initial and last name) and values as email addresses
         """
-        self.data_dir = f"{pathlib.Path(__file__).resolve().parent}/data"
-        with open(f"{self.data_dir}/raw/{employee_email_list}.txt") as f:
+        if path_to_top == "cli":
+            self.path_to_top = f"{pathlib.Path(__file__).resolve().parent}"
+        else:
+            self.path_to_top = path_to_top
+
+        with open(f"{self.path_to_top}/data/raw/{employee_email_list}.txt") as f:
             data = f.read()
 
         self.tutors_and_emails = ast.literal_eval(data)
@@ -121,7 +139,7 @@ class EmailWithAttachment:
         """
         Emails out the attaced schedules to tutors
         """
-        with open(f'{self.data_dir}/raw/email_body.txt') as f:
+        with open(f'{self.path_to_top}/data/raw/email_body.txt') as f:
             body = f.read()
         
         from_address = "alcschedule1@gmail.com"
@@ -146,7 +164,7 @@ class EmailWithAttachment:
                 message["Subject"] = f"ALC Schedule {datetime.strftime(datetime.now(),'%m.%d.%Y')}"
                 message.attach(MIMEText(body.format(name=name), "plain"))
                 
-                filename = f"{self.data_dir}/processed/{name}.pdf"
+                filename = f"{self.path_to_top}/data/processed/{name}.pdf"
 
                 # Open PDF file in binary mode
                 try:
@@ -176,11 +194,11 @@ class EmailWithAttachment:
                     )
                     log.info("Success: email sent")
                 except FileNotFoundError:
-                    log.warning(f"Error: No file for {name} in {self.data_dir}/processed/")
+                    log.warning(f"Error: No file for {name} in {self.path_to_top}/processed/")
 
             log.info(f"{lines}")
 
-def setup_logging(log_file_name,stream=False):
+def setup_logging(log_file_name):
     """
     Creates a logging object
 
@@ -204,46 +222,53 @@ def setup_logging(log_file_name,stream=False):
         logger.handlers.clear()
 
     # Create handler
-    dir_path = f"{pathlib.Path(__file__).resolve().parent}/reports"
-    f_handler = logging.FileHandler(f'{dir_path}/{log_file_name}.log',mode='w')
-    logging.getLogger().setLevel(logging.INFO)
+    try:
+        f_handler = logging.FileHandler(f'{application_path}/reports/{log_file_name}.log',mode='w')
+    except FileNotFoundError:
+        # means that we are running from CLI
+        dir_path = f"{pathlib.Path(__file__).resolve().parent}"
+        f_handler = logging.FileHandler(f'{dir_path}/reports/{log_file_name}.log',mode='w')
+    
+        logging.getLogger().setLevel(logging.INFO)
 
-    # Create formatter and add it to handler
-    f_format = logging.Formatter('%(asctime)s: (%(lineno)d) - %(levelname)s:\t%(message)s',datefmt='%m/%d/%y %H:%M:%S')
-    f_handler.setFormatter(f_format)
+        # Create formatter and add it to handler
+        f_format = logging.Formatter('%(asctime)s: (%(lineno)d) - %(levelname)s:\t%(message)s',datefmt='%m/%d/%y %H:%M:%S')
+        f_handler.setFormatter(f_format)
 
-    # Add handler to the logger
-    logger.addHandler(f_handler)
+        # Add handler to the logger
+        logger.addHandler(f_handler)
+    
+        pass
 
-    if stream:
-        # repeat the above steps but for a StreamHandler
-        c_handler = logging.StreamHandler()
-        c_handler.setLevel(logging.INFO)
-        c_format = logging.Formatter('%(asctime)s: %(levelname)s:\t%(message)s',datefmt='%m/%d/%y %H:%M:%S')
-        c_handler.setFormatter(c_format)
-        logger.addHandler(c_handler)
+    # repeat the above steps but for a StreamHandler
+    c_handler = logging.StreamHandler()
+    c_handler.setLevel(logging.INFO)
+    c_format = logging.Formatter('%(asctime)s: %(levelname)s:\t%(message)s',datefmt='%m/%d/%y %H:%M:%S')
+    c_handler.setFormatter(c_format)
+    logger.addHandler(c_handler)
 
     return logger
 
-def main(aggregate_schedule="ALC Schedule",employee_email_list="employee_email_list"):
+def main(aggregate_schedule, employee_email_list, path_to_top):
     """
     Gets the individualized schedules and emails them out to tutors
     """
     # create the individualized schedules
-    create_pdfs = CreateSchedules(aggregate_schedule=aggregate_schedule)
+    create_pdfs = CreateSchedules(aggregate_schedule=aggregate_schedule,path_to_top=path_to_top)
     pages_per_tutor = create_pdfs.get_pages_per_tutor()
     create_pdfs.split_pdf(pages_per_tutor=pages_per_tutor)
 
     # email out the schedules
-    email_tutors = EmailWithAttachment(employee_email_list=employee_email_list)
+    email_tutors = EmailWithAttachment(employee_email_list=employee_email_list,path_to_top=path_to_top)
     email_tutors.email_attachment()
 
-log = setup_logging(f"send_schedule_{datetime.strftime(datetime.now(),'%m%d%Y')}",stream=True)
+log = setup_logging(f"send_schedule_{datetime.strftime(datetime.now(),'%m%d%Y')}")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-s', help="aggregate pdf schedule name", default="ALC Schedule", type=str)
     parser.add_argument('-e', help="filename of employee names and their emails", default="Employees", type=str)
+    parser.add_argument('-p', help="path to the top of the project's directory", default=application_path, type=str)
     args = parser.parse_args()
 
-    main(aggregate_schedule=args.s,employee_email_list=args.e)
+    main(aggregate_schedule=args.s,employee_email_list=args.e,path_to_top=args.p)
