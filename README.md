@@ -14,7 +14,12 @@ The purpose of this project is to be able to send out mass emails to addresses p
 * **to integrate testing and code coverage** so that we can understand the moment something goes awry
 
 # Running the Program
-The latest release [v1.0.0]() contains two executable files for Mac-OS and Windows which run the `send_schedule.py` script as long as the folder structure is left intact and the file "ALC Schedule.pdf" is located in the same folder as the executable. Simply:
+The latest release [v1.0.0]() contains two executable files for Mac-OS and Windows which run the `send_schedule.py` script. For a successful run, ensure the folder structure is left intact and the following files are located in the **same folder as the `send_schedule.exe` file**:
+* "ALC Schedule.pdf": single PDF containing all the tutor schedules
+* "Employees.txt": text file in a json-like format containing the tutor names and their emails
+* "body.txt": file which holds the text to include in the body of the email
+
+If these files and the folders `/logs/` and `/processed_schedules/` are in the same location, then simply: 
 1. Click the `send_schedule.exe` icon
 2. A command prompt will open asking the user to input a gmail account and password. Enter the correct credentials, pressing enter after each.
 3. A series of messages will display on the command prompt indicating sucessful and unsuccessful email deliveries.
