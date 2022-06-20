@@ -34,10 +34,14 @@ This program has two main components:
 Each of these components is separated into two classes stored within the `send_schedule.py` script and are descirbed in more detail below.
 
 ## Splitting the PDF
+The [PyPDF2]() library can be used to read in PDF page content and extract important meta data from a PDF. We use this package to loop through each page and read the first character from each page. If the character is a letter, that indicates a tutor's name. If the character is a space or a number, then the program identifies this page as a continuation of the schedule for the most current tutor. As the program loops through each page, it builds a Python `dict` which stores the tutors' names and the page number(s) (zero-indexed) that their schedule corresponds to from the aggregate document. With this information saved, we loop through the tutors and their pages and create separate documents using only the pages for that tutor, saving the document as the tutors name in the `/processed_schedules/` folder. 
 
+For more code examples, please see the [Create Individual Schedules Notebook](https://github.com/HagenFritz/mass-email-sender/blob/main/notebooks/1.0.0-hef-create_individual_schedules-examples.ipynb) in this repository. 
 
 ## Emailing Attachments to a List of Employees
-We borrow much of the code from this [article](https://realpython.com/python-send-email/) which also provides some nice details regarding the process. 
+We borrow much of the code from this [article](https://realpython.com/python-send-email/) which also provides some nice details regarding the process. The program uses the [SMTP]() library to make a connection with the Gmail server to send emails. We use the [MIME]() package to create the message which allows the addition of text for the email body and attaches the tutor's PDF. 
+
+For more code examples, please see the [Emailing Attachments](https://github.com/HagenFritz/mass-email-sender/blob/main/notebooks/2.0.0-hef-emailing_attachments-examples.ipynb) in this repository. 
 
 ## Resources
 Some the articles and other resources used to help construct the code in this repository
