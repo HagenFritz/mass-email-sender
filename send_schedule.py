@@ -74,8 +74,8 @@ class CreateSchedules:
             # getting page content
             page = self.pdf.pages[pg_no]
             page_content = page.extractText()
-            # pages that start with a space or number are continuations from same tutor
-            if page_content[0] == " " or page_content[0] in [str(num) for num in range(0,10)]:
+            # pages that start with a space, number, or "App" are continuations from same tutor
+            if page_content[0] == " " or page_content[0] in [str(num) for num in range(0,10)] or page_content[0:3].lower() == "app":
                 pages_per_tutor[current_tutor].append(pg_no)
             # pages that start with letter mean that the page corresponds to a new tutor
             else:
