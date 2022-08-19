@@ -130,4 +130,5 @@ dmypy.json
 
 
 *.DS_Store
+/processed_schedules/
 *.pdf
