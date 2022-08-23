@@ -20,6 +20,8 @@ from email.mime.text import MIMEText
 
 from datetime import datetime
 
+from settings import USERNAME, EMAIL_KEY
+
 # Needed for conversion to .exe
 application_path = os.path.dirname(sys.executable)
 
@@ -75,7 +77,7 @@ class CreateSchedules:
             page = self.pdf.pages[pg_no]
             page_content = page.extractText()
             # pages that start with a space, number, or "App" are continuations from same tutor
-            if page_content[0] == " " or page_content[0] in [str(num) for num in range(0,10)] or page_content[0:3].lower() == "app":
+            if page_content[0] == " " or page_content[0] in [str(num) for num in range(0,10)] or page_content[0:3].lower() == "app" or "," in page_content.split("\n")[0].strip():
                 pages_per_tutor[current_tutor].append(pg_no)
             # pages that start with letter mean that the page corresponds to a new tutor
             else:
@@ -142,8 +144,8 @@ class EmailWithAttachment:
         with open(f'{self.path_to_top}/email_body.txt') as f:
             body = f.read()
         
-        from_address = input("Type the email account: ")
-        password = input("Type your password and press enter: ")
+        from_address = USERNAME#"alcschedule1@gmail.com"#input("Type the email account: ")
+        password = EMAIL_KEY#"wcctjlwvjjyzvneu"#input("Type your password and press enter: ")
 
         context = ssl.create_default_context()
         with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
